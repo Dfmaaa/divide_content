@@ -28,7 +28,10 @@ void sig_h(int s){
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
     if(getchar()='Y')signal(sig, sig_h);
 }
-//A function to divide a file into different parts.
+/*A function to divide a file into different parts.
+This function was necessary for huge files. This is a very general implementation. Meaning it's not only
+for files. The struct name can be misleading but it is a way of saying that is the only purpose of the struct
+in our program.*/
 int divide_f(char *fname, uint64_t max,fnode **head ){
     int handle=open(fname,O_RDONLY);
     if(handle==-1)return DIVF_FAILURE;
