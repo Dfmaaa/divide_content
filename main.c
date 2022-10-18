@@ -6,9 +6,15 @@ have been dealt with. */
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <unistd.h>
 #include <signal.h>
 #include <stdint.h>
+#include <dirent.h>
+#include "structs/file_list.h"
+#define DIVF_SUCCESS 1
+#define DIVF_FAILURE 0
+//users can change these
 #define SCMP_SUCCESS 0
 #define ALLOC_FAILURE NULL
 //global statistical variables
@@ -23,11 +29,32 @@ void sig_h(int s){
     if(getchar()='Y')signal(sig, sig_h);
 }
 //A function to divide a file into different parts.
-
+int divide_f(char *fname, uint64_t max,fnode **head ){
+    int handle=open(fname,O_RDONLY);
+    if(handle==-1)return DIVF_FAILURE;
+    struct stat ls;
+    if(fstat(handle,&ls)==-1){
+      close(handle);
+      return DIVF_FAILURE;
+    }
+    *head=NULL;
+    char *f_string=(char*)mmap(NULL,ls.st_size,PROT_READ, MAP_PRIVATE, handle, 0);
+    char *s;
+    uint64_t parts=(int)(ls.st_size/(float)max);
+    uint64_t counter=0;
+    uint64_t numfc=0;
+    while(numfc++<parts){
+        while(counter++<max-1)s[counter]=f_string[counter];
+        s[counter]='\0';
+        insert(head,s);
+        counter=0;
+    }
+    return DIVF_SUCCESS;
+}
 int main(int argc, char **argv){
     if(argc!=3){
         printf("Usage: %s [directory] [max directory size]");
         return EXIT_FAILURE;
     }
-
+    
 }
