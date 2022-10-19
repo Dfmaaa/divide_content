@@ -23,6 +23,7 @@ uint64_t num_done=0;
 int (*scmp)(const char *, const char *)=strcmp;
 void (*alloc)(size_t)=malloc;
 void (*dalloc)(void *)=free;
+char (*concat)(const char *, const char *)=strcat;
 void sig_h(int s){
     signal(s,SIG_IGN);
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
@@ -54,6 +55,7 @@ int divide_f(char *fname, uint64_t max,fnode **head ){
     }
     return DIVF_SUCCESS;
 }
+void traverse(DIR *d, char *path)
 int main(int argc, char **argv){
     if(argc!=3){
         printf("Usage: %s [directory] [max directory size]");

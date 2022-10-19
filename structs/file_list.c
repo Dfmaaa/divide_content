@@ -7,7 +7,7 @@ void insert(fnode **head, char *content){
     if(*head==NULL){
         *head=(fnode*)alloc(sizeof(fnode));
         if(*head==NULL){
-            perror("[malloc]");
+            perror("[alloc]");
             return;
         }
         (**head).content=content;
@@ -18,7 +18,7 @@ void insert(fnode **head, char *content){
     while((*selected).next!=NULL)selected=(*selected).next;
     (*selected).next=(fnode*)alloc(sizeof(fnode));
     if((*selected).next==NULL){
-        perror("[malloc]");
+        perror("[alloc]");
         return;
     }
     (*(*selected).next).content=content;
