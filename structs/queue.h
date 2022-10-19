@@ -1,3 +1,4 @@
+#define QUEUE_END 1
 #pragma pack(1)
 struct qnode{
   DIR *d;

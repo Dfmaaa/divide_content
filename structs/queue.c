@@ -32,7 +32,7 @@ qnode dequeue(qnode **tail, int *SIGEND){
     qnode retstruct=**tail;
     if((**tail).parent==NULL){
         dalloc(*tail);
-        *SIGEND=1;
+        *SIGEND=QUEUE_END;
     }
     else{
         *tail=(**tail).parent;
