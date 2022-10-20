@@ -11,6 +11,7 @@ have been dealt with. */
 #include <signal.h>
 #include <stdint.h>
 #include <dirent.h>
+#include <ftw.h>
 #include "structs/file_list.h"
 #define DIVF_SUCCESS 1
 #define DIVF_FAILURE 0
@@ -89,20 +90,35 @@ void traverse(DIR *d, char *path){
             dalloc(sl);
             dalloc(path);
         }
-        int handle=open((*trv).d_name,O_RDONLY);
-        if(handle==-1){
-            printf("Can't open %s. Clean?(Y/N)\n",(*trv).d_name);
-            if(getchar()=='Y'){
+        else{
+            int handle=open((*trv).d_name,O_RDONLY);
+            if(handle==-1){
+                printf("Can't open %s. Clean?(Y/N)\n",(*trv).d_name);
+                if(getchar()=='Y'){
                 //TODO: Implement directory list and recursive delete.
+                }
+                exit(EXIT_FAILURE);
             }
-            exit(EXIT_FAILURE);
-        }
-        struct stat ls;
-        if(fstat(handle,&ls)==-1){
-        close(handle);
-        return;
+            struct stat ls;
+            if(fstat(handle,&ls)==-1){
+                close(handle);
+                return;
+            }
         }
     }
+}
+void recursive_delete_d(const char *c){
+    if (nftw(argv[1], rmfiles,10, FTW_DEPTH|FTW_MOUNT|FTW_PHYS)<0){
+        perror("[nftw]");
+        exit(EXIT_FAILURE);
+    }
+}
+static int rmfiles(const char *pathname, const struct stat *sbuf, int type, struct FTW *ftwb){
+    if(remove(pathname)<0){
+        perror("[remove]");
+        return -1;
+    }
+    return 0;
 }
 void create_nested_dirs(const char *path){
     char *d=split(path,"/");
