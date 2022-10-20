@@ -17,17 +17,36 @@ have been dealt with. */
 //users can change these
 #define SCMP_SUCCESS 0
 #define ALLOC_FAILURE NULL
+#define CD_PERMS S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
 //global statistical variables
 uint64_t num_done=0;
 //function pointers that can be changed by client
 int (*scmp)(const char *, const char *)=strcmp;
 void (*alloc)(size_t)=malloc;
 void (*dalloc)(void *)=free;
-char (*concat)(const char *, const char *)=strcat;
+char* (*concat)(const char *, const char *)=sstrcat; //only function pointer that uses custom function.
+size_t (*slen)(const char *)=strlen;
+char* (*split)(char *restrict, const char *restrict)=strtok; //NOTE: should be like strtok.
+uint64_t max;
 void sig_h(int s){
     signal(s,SIG_IGN);
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
     if(getchar()='Y')signal(sig, sig_h);
+}
+char  *sstrcat(const char *cp1, const char *cp2){
+    int len1=slen(cp1);
+    int len2=slen(cp2);
+    char *new_str=(char *)alloc(sizeof(char)*(len1+len2+1));
+    int globcount, ocount=0;
+    while(cp1[ocount]!='\0'){
+    new_str[globcount++]=cp1[ocount++];
+    }
+    ocount=0;
+    while(cp2[ocount]!='\0'){
+    new_str[globcount++]=cp2[ocount++];
+    }
+    new_str[globcount]='\0';
+    return new_str;
 }
 /*A function to divide a file into different parts.
 This function was necessary for huge files. This is a very general implementation. Meaning it's not only
@@ -55,11 +74,55 @@ int divide_f(char *fname, uint64_t max,fnode **head ){
     }
     return DIVF_SUCCESS;
 }
-void traverse(DIR *d, char *path)
+int __is_dir(const char *c){
+    struct stat s;
+    stat(c, &s);
+    return s.st_mode==S_IFDIR;
+}
+void traverse(DIR *d, char *path){
+    struct dirent *trv;
+    uint64_t size_counter=0;
+    while((trv=readdir(d))!=NULL){
+        if(__is_dir((*trv).d_name)){
+            char *sl=concat(path,"/");
+            traverse(opendir((*trv).d_name),concat(sl,(*trv).d_name));
+            dalloc(sl);
+            dalloc(path);
+        }
+        int handle=open((*trv).d_name,O_RDONLY);
+        if(handle==-1){
+            printf("Can't open %s. Clean?(Y/N)\n",(*trv).d_name);
+            if(getchar()=='Y'){
+                //TODO: Implement directory list and recursive delete.
+            }
+            exit(EXIT_FAILURE);
+        }
+        struct stat ls;
+        if(fstat(handle,&ls)==-1){
+        close(handle);
+        return;
+        }
+    }
+}
+void create_nested_dirs(const char *path){
+    char *d=split(path,"/");
+    char *s=d;
+    char *ss;
+    mkdir(d,CD_PERMS);
+    while((d=split(NULL,"/"))!=NULL){
+        ss=s; //Sorry.
+        s=concat(s,"/");
+        dalloc(ss);
+        ss=s; // ;) Elegant solution, am I right?
+        s=concat(s,d);
+        mkdir(s,CD_PERMS);
+    }
+    dalloc(s);
+}
 int main(int argc, char **argv){
     if(argc!=3){
         printf("Usage: %s [directory] [max directory size]");
         return EXIT_FAILURE;
     }
-    
+    max=strtol(argv[2]);
 }
