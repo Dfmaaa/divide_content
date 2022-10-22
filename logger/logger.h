@@ -3,3 +3,4 @@
 #define STDOUT 1
 #define ERR_WRITE_INTERNAL(E) write(STDERR,E,MAX_ERR_MSG)
 typedef unsigned char* ERR_MESSAGE;
+void append_msg(const ERR_MESSAGE, const char *);

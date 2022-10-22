@@ -32,9 +32,10 @@ void (*dalloc)(void *)=free;
 char* (*concat)(const char *, const char *)=sstrcat; //only function pointer that uses custom function.
 size_t (*slen)(const char *)=strlen;
 char* (*split)(char *restrict, const char *restrict)=strtok; //NOTE: should be like strtok.
-uint64_t max;
+static uint64_t max;
 extern char grid[20][60];
-char *output_directory;
+static char *output_directory;
+char *global_log_n;
 void sig_h(int s){
     signal(s,SIG_IGN);
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
@@ -117,6 +118,7 @@ void traverse(DIR *d, char *path, char *cd){
                 close(handle);
                 return;
             }
+            
         }
     }
     clean:
