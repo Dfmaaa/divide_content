@@ -16,6 +16,7 @@ have been dealt with. */
 #include "structs/file_list.h"
 #include "statistics/plot.h"
 #include "structs/queue.h"
+#include "logger/logger.h"
 #define DIVF_SUCCESS 1
 #define DIVF_FAILURE 0
 //users can change these
@@ -88,18 +89,22 @@ int __is_dir(const char *c){
 void traverse(DIR *d, char *path, char *cd){
     struct dirent *trv;
     uint64_t size_counter=0;
+    char *clean_f;
     while((trv=readdir(d))!=NULL){
+        //if directory
         if(__is_dir((*trv).d_name)){
             char *sl=concat(path,"/");
             traverse(opendir((*trv).d_name),concat(sl,(*trv).d_name));
             dalloc(sl);
             dalloc(path);
         }
+        //if file
         else{
             int handle=open((*trv).d_name,O_RDONLY);
             if(handle==-1){
-                printf("Can't open %s. Clean?(Y/N)\n",(*trv).d_name);
-                 if(getchar()=='Y'){
+                clean_f=(*trv).d_name;
+                goto clean;
+                if(getchar()=='Y'){
                     recursive_delete_d(output_directory);
                     puts("Done.");
                     exit(EXIT_FAILURE);
@@ -107,11 +112,20 @@ void traverse(DIR *d, char *path, char *cd){
             }
             struct stat ls;
             if(fstat(handle,&ls)==-1){
+                clean_f=(*trv).d_name;
+                goto clean;
                 close(handle);
                 return;
             }
         }
     }
+    clean:
+        printf("Can't open %s. Clean?(Y/N)\n",clean_f);
+        if(getchar()=='Y'){
+            recursive_delete_d(output_directory);
+            puts("Done.");
+            exit(EXIT_FAILURE);
+        }
 }
 void recursive_delete_d(const char *c){
     if (nftw(c, rmfiles,10, FTW_DEPTH | FTW_MOUNT | FTW_PHYS)<0){
