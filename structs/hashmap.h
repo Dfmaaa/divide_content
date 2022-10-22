@@ -15,6 +15,6 @@ union hnode{
 };
 typedef union hnode hnode;
 typedef unsigned short HCODE;
-void insert(hnode **, void *, void *, HCODE);
-void delete(hnode *, HCODE);
+void insertk(hnode **, void *, void *, HCODE);
+void deletew(hnode *, HCODE);
 void* get(hnode *,void *,HCODE);

@@ -18,16 +18,17 @@ have been dealt with. */
 #include "structs/queue.h"
 #include "logger/logger.h"
 #include "structs/hashmap.h"
-//all these are either 0 or 1. Only for readabilty purposes.
+//all these are either 0, NULL, or 1. Only for readabilty purposes.
 #define DIVF_SUCCESS 1
 #define DIVF_FAILURE 0
 #define FCP_SUCCESS 1
 #define FCP_FAILURE 0
-//users can change these
 #define SCMP_SUCCESS 0
 #define ALLOC_FAILURE NULL
-#define CD_PERMS S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
-#define MAX_READ 5076
+//users can change these
+#define CD_PREFIX "directory" //Prefix of output sub-directories. Suffix is directory number.
+#define CD_PERMS S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH //permissions for directories
+#define MAX_READ 5076 //maximum bytes to be read by any file reading function.
 //global statistical variables
 uint64_t num_done=0;
 //function pointers that can be changed by client
