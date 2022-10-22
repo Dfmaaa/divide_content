@@ -17,12 +17,17 @@ have been dealt with. */
 #include "statistics/plot.h"
 #include "structs/queue.h"
 #include "logger/logger.h"
+#include "structs/hashmap.h"
+//all these are either 0 or 1. Only for readabilty purposes.
 #define DIVF_SUCCESS 1
 #define DIVF_FAILURE 0
+#define FCP_SUCCESS 1
+#define FCP_FAILURE 0
 //users can change these
 #define SCMP_SUCCESS 0
 #define ALLOC_FAILURE NULL
 #define CD_PERMS S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
+#define MAX_READ 5076
 //global statistical variables
 uint64_t num_done=0;
 //function pointers that can be changed by client
@@ -36,6 +41,7 @@ static uint64_t max;
 extern char grid[20][60];
 static char *output_directory;
 char *global_log_n;
+hnode **hashmap_dn=NULL;
 void sig_h(int s){
     signal(s,SIG_IGN);
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
@@ -87,6 +93,27 @@ int __is_dir(const char *c){
     stat(c, &s);
     return s.st_mode==S_IFDIR;
 }
+//copy bytes from f1 to f2
+int fcopy(const char *f1, const char *f2){
+    int fd1=open(fd1, O_RDONLY);
+    int fd2=open(fd2,O_WRONLY | O_CREAT);
+    if(fd1==-1||fd2==-1){
+        append_msg("Can't write to, or open file.\n",global_log_n);
+        return FCP_FAILURE;
+    }
+    struct stat s;
+    if(fstat(fd1,&s)==-1){
+        append_msg("fstat failure.\n",global_log_n);
+        return FCP_FAILURE;
+    }
+    char *cc=(char*)mmap(NULL,s.st_size,PROT_READ,MAP_PRIVATE,fd1,0);
+    int counter=0;
+    while(cc[counter++]!='\0'){
+        write(fd2,(char[]){cc[counter]},1);
+    }
+    close(fd1);
+    close(fd2);
+}
 void traverse(DIR *d, char *path, char *cd){
     struct dirent *trv;
     uint64_t size_counter=0;
@@ -118,7 +145,10 @@ void traverse(DIR *d, char *path, char *cd){
                 close(handle);
                 return;
             }
-            
+            uint64_t flen=ls.st_size;
+            if(size_counter+flen<=max){
+                
+            }
         }
     }
     clean:

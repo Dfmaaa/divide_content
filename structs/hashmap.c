@@ -7,6 +7,7 @@
 extern void (*alloc)(size_t);
 extern void (*dalloc)(void *);
 extern char* glob_log_n;
+extern int (*scmp)(const char *, const char *);
 void insert(hnode **head, void *k,void *v, HCODE h){
     if(*head==NULL){
         *head=(hnode*)alloc(sizeof(hnode));
@@ -100,7 +101,7 @@ void* get(hnode *head, void *k, HCODE h){
         case CI:
             char *tc=(char*)k;
             while(selected!=NULL){
-                if(strcmp((*selected).ci.key,tc)==0)return (void*)&(*selected).ci.value;
+                if(scmp((*selected).ci.key,tc)==0)return (void*)&(*selected).ci.value;
                 selected=(*selected).ci.next;
             }
         case II:
@@ -113,7 +114,32 @@ void* get(hnode *head, void *k, HCODE h){
             append_msg(HCODE_INV_MSG,glob_log_n);
             char *tc=(char*)k;
             while(selected!=NULL){
-                if(strcmp((*selected).ci.key,tc)==0)return (void*)&(*selected).ci.value;
+                if(scmp((*selected).ci.key,tc)==0)return (void*)&(*selected).ci.value;
+                selected=(*selected).ci.next;
+            }
+    }
+    return NULL;
+}
+hnode *getp(hnode *head, void *k, HCODE h){
+    hnode *selected=head;
+    switch(h){
+        case CI:
+            char *tc=(char*)k;
+            while(selected!=NULL){
+                if(scmp((*selected).ci.key,tc)==0)return selected;
+                selected=(*selected).ci.next;
+            }
+        case II:
+            int tc=*(int*)k;
+            while(selected!=NULL){
+                if((*selected).ii.key==tc)return selected;
+                selected=(*selected).ii.next;
+            }
+        default:
+            append_msg(HCODE_INV_MSG,glob_log_n);
+            char *tc=(char*)k;
+            while(selected!=NULL){
+                if(scmp((*selected).ci.key,tc)==0)return selected;
                 selected=(*selected).ci.next;
             }
     }
