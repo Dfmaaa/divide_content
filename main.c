@@ -12,7 +12,9 @@ have been dealt with. */
 #include <stdint.h>
 #include <dirent.h>
 #include <ftw.h>
+#include <pthread.h>
 #include "structs/file_list.h"
+#include "statistics/plot.h"
 #define DIVF_SUCCESS 1
 #define DIVF_FAILURE 0
 //users can change these
@@ -29,6 +31,7 @@ char* (*concat)(const char *, const char *)=sstrcat; //only function pointer tha
 size_t (*slen)(const char *)=strlen;
 char* (*split)(char *restrict, const char *restrict)=strtok; //NOTE: should be like strtok.
 uint64_t max;
+extern char grid[20][60];
 void sig_h(int s){
     signal(s,SIG_IGN);
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
