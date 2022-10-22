@@ -194,4 +194,10 @@ int main(int argc, char **argv){
         return EXIT_FAILURE;
     }
     max=strtol(argv[2]);
+    if(mkdir(argv[1],CD_PERMS)==-1){
+        puts("Output directory already exists. Overwrite?(This can result in unpredictable output.)(Y/N)");
+        if(getchar()=='N'){
+            return EXIT_FAILURE;
+        }
+    }
 }

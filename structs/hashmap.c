@@ -8,7 +8,7 @@ extern void (*alloc)(size_t);
 extern void (*dalloc)(void *);
 extern char* glob_log_n;
 extern int (*scmp)(const char *, const char *);
-void insert(hnode **head, void *k,void *v, HCODE h){
+void insertk(hnode **head, void *k,void *v, HCODE h){
     if(*head==NULL){
         *head=(hnode*)alloc(sizeof(hnode));
         if(*head==NULL){
@@ -70,7 +70,7 @@ void insert(hnode **head, void *k,void *v, HCODE h){
     }
 }
 //assuming user would never need to remove individual keys because that feature is not relevant to the program.
-void delete(hnode *head, HCODE h){
+void deletew(hnode *head, HCODE h){
     hnode *selected=head;
     hnode *save;
     switch(h){
