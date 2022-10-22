@@ -15,6 +15,7 @@ have been dealt with. */
 #include <pthread.h>
 #include "structs/file_list.h"
 #include "statistics/plot.h"
+#include "structs/queue.h"
 #define DIVF_SUCCESS 1
 #define DIVF_FAILURE 0
 //users can change these
@@ -32,6 +33,7 @@ size_t (*slen)(const char *)=strlen;
 char* (*split)(char *restrict, const char *restrict)=strtok; //NOTE: should be like strtok.
 uint64_t max;
 extern char grid[20][60];
+char *output_directory;
 void sig_h(int s){
     signal(s,SIG_IGN);
     printf("%llu files have been dealt with. Exit?(Y/N)\n",num_done);
@@ -83,7 +85,7 @@ int __is_dir(const char *c){
     stat(c, &s);
     return s.st_mode==S_IFDIR;
 }
-void traverse(DIR *d, char *path){
+void traverse(DIR *d, char *path, char *cd){
     struct dirent *trv;
     uint64_t size_counter=0;
     while((trv=readdir(d))!=NULL){
@@ -97,10 +99,11 @@ void traverse(DIR *d, char *path){
             int handle=open((*trv).d_name,O_RDONLY);
             if(handle==-1){
                 printf("Can't open %s. Clean?(Y/N)\n",(*trv).d_name);
-                if(getchar()=='Y'){
-                //TODO: Implement directory list and recursive delete.
-                }
-                exit(EXIT_FAILURE);
+                 if(getchar()=='Y'){
+                    recursive_delete_d(output_directory);
+                    puts("Done.");
+                    exit(EXIT_FAILURE);
+                 }
             }
             struct stat ls;
             if(fstat(handle,&ls)==-1){
@@ -111,7 +114,7 @@ void traverse(DIR *d, char *path){
     }
 }
 void recursive_delete_d(const char *c){
-    if (nftw(argv[1], rmfiles,10, FTW_DEPTH|FTW_MOUNT|FTW_PHYS)<0){
+    if (nftw(c, rmfiles,10, FTW_DEPTH | FTW_MOUNT | FTW_PHYS)<0){
         perror("[nftw]");
         exit(EXIT_FAILURE);
     }
